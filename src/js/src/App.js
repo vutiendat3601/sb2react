@@ -1,9 +1,18 @@
-import { Table } from "antd";
+import { Avatar, Table } from "antd";
 import { useEffect, useState } from "react";
 import "./App.css";
+import Container from "./Container.js";
 import { getAllStudents } from "./client.js";
-
 const columns = [
+  {
+    title: "",
+    key: "avatar",
+    render: (text, student) => (
+      <Avatar size={"large"}>
+        {`${student.firstName.charAt(0)}${student.lastName.charAt(0)}`}
+      </Avatar>
+    ),
+  },
   {
     title: "Student ID",
     dataIndex: "studentId",
@@ -47,10 +56,17 @@ const App = () => {
 
   if (students && students.length) {
     return (
-      <Table columns={columns} dataSource={students} rowKey={"studentId"} />
+      <Container>
+        <Table
+          columns={columns}
+          dataSource={students}
+          rowKey={"studentId"}
+          pagination={false}
+        />
+      </Container>
     );
   }
-  return <h1>Spring Boot with React</h1>;
+  return <h1>No Student found</h1>;
 };
 
 export default App;
