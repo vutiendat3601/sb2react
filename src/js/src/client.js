@@ -1,3 +1,3 @@
-const getAllStudents = () => fetch('/students');
+const getAllStudents = () => fetch('api/students');
 
 export { getAllStudents };
