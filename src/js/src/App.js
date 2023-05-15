@@ -1,9 +1,11 @@
-import { Avatar, Table } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Avatar, Spin, Table } from "antd";
 import { useEffect, useState } from "react";
 import "./App.css";
 import Container from "./Container.js";
 import { getAllStudents } from "./client.js";
-const columns = [
+
+const studentCols = [
   {
     title: "",
     key: "avatar",
@@ -40,25 +42,40 @@ const columns = [
   },
 ];
 
+const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+
 const App = () => {
   const [students, setStudents] = useState([]);
+
+  const [fetching, setFetching] = useState(false);
+
   useEffect(() => {
     fetchStudents();
   }, []);
 
   const fetchStudents = () => {
+    setFetching(true);
     getAllStudents()
       .then((resp) => resp.json())
       .then((students) => {
         setStudents(students);
+        setFetching(false);
       });
   };
+
+  if (fetching) {
+    return (
+      <Container>
+        <Spin indicator={antIcon}></Spin>
+      </Container>
+    );
+  }
 
   if (students && students.length) {
     return (
       <Container>
         <Table
-          columns={columns}
+          columns={studentCols}
           dataSource={students}
           rowKey={"studentId"}
           pagination={false}
