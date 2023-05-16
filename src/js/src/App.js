@@ -2,8 +2,11 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { Avatar, Spin, Table } from "antd";
 import { useEffect, useState } from "react";
 import "./App.css";
-import Container from "./Container.js";
-import { getAllStudents } from "./client.js";
+import Container from "./Container";
+import { getAllStudents } from "./client";
+import Footer from "./Footer";
+import AddStudentForm from "./forms/AddStudentForm";
+import Modal from "antd/es/modal/Modal";
 
 const studentCols = [
   {
@@ -49,6 +52,7 @@ const App = () => {
 
   const [fetching, setFetching] = useState(false);
 
+  const [addingStudent, setAddingStudent] = useState(false);
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -62,6 +66,9 @@ const App = () => {
         setFetching(false);
       });
   };
+  const openAddStudentModal = () => setAddingStudent(true);
+
+  const closeAddStudentModal = () => setAddingStudent(false);
 
   if (fetching) {
     return (
@@ -80,6 +87,25 @@ const App = () => {
           rowKey={"studentId"}
           pagination={false}
         />
+        <Modal
+          title="Add new student"
+          open={addingStudent}
+          onOk={closeAddStudentModal}
+          onCancel={closeAddStudentModal}
+          width={1000}>
+          <AddStudentForm
+            onSuccess={() => {
+              this.closeAddStudentModal();
+              this.fetchStudents();
+            }}
+            onFailure={(error) => {
+              const message = error.error.message;
+              const description = error.error.httpStatus;
+              // errorNotification(message, description);
+            }}
+          />
+        </Modal>
+        <Footer onAddStudentClick={openAddStudentModal}></Footer>
       </Container>
     );
   }

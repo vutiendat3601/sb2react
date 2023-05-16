@@ -1,3 +1,4 @@
-const getAllStudents = () => fetch('api/students');
+const getAllStudents = () => fetch("api/students");
+const addNewStudent = () => fetch("api/students");
 
-export { getAllStudents };
+export { getAllStudents, addNewStudent };
