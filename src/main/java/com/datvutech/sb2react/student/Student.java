@@ -48,4 +48,15 @@ public class Student {
     public Gender getGender() {
         return gender;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+            " studentId='" + getStudentId() + "'" +
+            ", firstName='" + getFirstName() + "'" +
+            ", lastName='" + getLastName() + "'" +
+            ", email='" + getEmail() + "'" +
+            ", gender='" + getGender() + "'" +
+            "}";
+    }
 }
