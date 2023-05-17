@@ -1,6 +1,7 @@
 import { Input, Button, Tag } from "antd";
 import { Formik } from "formik";
-import { addNewStudent } from "../client";
+import { errorNotification } from "../Notification";
+import apiClient from "../client";
 
 const inputBottomMargin = { marginBottom: "10px" };
 const tagStyle = {
@@ -9,10 +10,17 @@ const tagStyle = {
   ...inputBottomMargin,
 };
 
-const AddStudentForm = ({ onSuccess, onFailure }) => (
-  <Formik
-    initialValues={{ firstName: "", lastName: "", email: "", gender: "" }}
-    validate={(values) => {
+const initialValues = {
+  firstName: null,
+  lastName: null,
+  email: null,
+  gender: null,
+};
+const AddStudentForm = ({ onSuccess, onFailure }) => {
+  return (
+    <Formik
+      initialValues={initialValues}
+      /*  validate={(values) => {
       let errors = {};
 
       if (!values.firstName) {
@@ -40,86 +48,88 @@ const AddStudentForm = ({ onSuccess, onFailure }) => (
       }
 
       return errors;
-    }}
-    onSubmit={(student, { setSubmitting }) => {
-      addNewStudent(student)
-        .then(() => {
-          onSuccess();
-        })
-        .catch((err) => {
-          onFailure(err);
-        })
-        .finally(() => {
+    }} */
+      onSubmit={async (student, { setSubmitting }) => {
+        setSubmitting(true);
+        try {
+          await apiClient.addNewStudent(student);
+        } catch (error) {
+          const data = error.response.data;
+          errorNotification(data.message, data.errors);
+        } finally {
           setSubmitting(false);
-        });
-    }}>
-    {({
-      values,
-      errors,
-      touched,
-      handleChange,
-      handleBlur,
-      handleSubmit,
-      isSubmitting,
-      submitForm,
-      isValid,
-      /* and other goodies */
-    }) => (
-      <form onSubmit={handleSubmit}>
-        <Input
-          style={inputBottomMargin}
-          name="firstName"
-          onChange={handleChange}
-          onBlur={handleBlur}
-          value={values.firstName}
-          placeholder="First name. E.g John"
-        />
-        {errors.firstName && touched.firstName && (
-          <Tag style={tagStyle}>{errors.firstName}</Tag>
-        )}
-        <Input
-          style={inputBottomMargin}
-          name="lastName"
-          onChange={handleChange}
-          onBlur={handleBlur}
-          value={values.lastName}
-          placeholder="Last name. E.g Jones"
-        />
-        {errors.lastName && touched.lastName && (
-          <Tag style={tagStyle}>{errors.lastName}</Tag>
-        )}
-        <Input
-          style={inputBottomMargin}
-          name="email"
-          type="email"
-          onChange={handleChange}
-          onBlur={handleBlur}
-          value={values.email}
-          placeholder="Email. E.g example@gmail.com"
-        />
-        {errors.email && touched.email && (
-          <Tag style={tagStyle}>{errors.email}</Tag>
-        )}
-        <Input
-          style={inputBottomMargin}
-          name="gender"
-          onChange={handleChange}
-          onBlur={handleBlur}
-          value={values.gender}
-          placeholder="Gender. E.g Male or Female"
-        />
-        {errors.gender && touched.gender && (
-          <Tag style={tagStyle}>{errors.gender}</Tag>
-        )}
-        <Button
-          onClick={() => submitForm()}
-          type="submit"
-          disabled={isSubmitting | (touched && !isValid)}>
-          Submit
-        </Button>
-      </form>
-    )}
-  </Formik>
-);
+        }
+      }}
+    >
+      {({
+        values,
+        errors,
+        touched,
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        isSubmitting,
+        submitForm,
+        isValid,
+        /* and other goodies */
+      }) => (
+        <form onSubmit={handleSubmit}>
+          <Input
+            style={inputBottomMargin}
+            name="firstName"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.firstName}
+            placeholder="First name. E.g John"
+          />
+          {errors.firstName && touched.firstName && (
+            <Tag style={tagStyle}>{errors.firstName}</Tag>
+          )}
+          <Input
+            style={inputBottomMargin}
+            name="lastName"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.lastName}
+            placeholder="Last name. E.g Jones"
+          />
+          {errors.lastName && touched.lastName && (
+            <Tag style={tagStyle}>{errors.lastName}</Tag>
+          )}
+          <Input
+            style={inputBottomMargin}
+            name="email"
+            type="email"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.email}
+            placeholder="Email. E.g example@gmail.com"
+          />
+          {errors.email && touched.email && (
+            <Tag style={tagStyle}>{errors.email}</Tag>
+          )}
+          <Input
+            style={inputBottomMargin}
+            name="gender"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.gender}
+            placeholder="Gender. E.g Male or Female"
+          />
+          {errors.gender && touched.gender && (
+            <Tag style={tagStyle}>{errors.gender}</Tag>
+          )}
+          <Button
+            onClick={() => submitForm()}
+            type="submit"
+            disabled={isSubmitting | (touched && !isValid)}
+          >
+            Submit
+          </Button>
+        </form>
+      )}
+    </Formik>
+  );
+};
 
 export default AddStudentForm;

@@ -1,12 +1,13 @@
 import { LoadingOutlined } from "@ant-design/icons";
-import { Avatar, Spin, Table } from "antd";
+import { Avatar, Empty, Spin, Table } from "antd";
 import { useEffect, useState } from "react";
 import "./App.css";
 import Container from "./Container";
-import { getAllStudents } from "./client";
+import apiClient, { getAllStudents } from "./client";
 import Footer from "./Footer";
 import AddStudentForm from "./forms/AddStudentForm";
 import Modal from "antd/es/modal/Modal";
+import { errorNotification } from "./Notification";
 
 const studentCols = [
   {
@@ -57,18 +58,47 @@ const App = () => {
     fetchStudents();
   }, []);
 
-  const fetchStudents = () => {
+  const fetchStudents = async () => {
     setFetching(true);
-    getAllStudents()
-      .then((resp) => resp.json())
-      .then((students) => {
-        setStudents(students);
-        setFetching(false);
-      });
+    try {
+      const studentsData = await apiClient.getAllStudents();
+      setStudents(studentsData);
+    } catch (error) {
+      const errorData = error.response.data;
+      errorNotification(errorData.message);
+    } finally {
+      setFetching(false);
+    }
   };
   const openAddStudentModal = () => setAddingStudent(true);
 
   const closeAddStudentModal = () => setAddingStudent(false);
+
+  const commonElements = () => (
+    <div>
+      <Modal
+        title="Add new student"
+        open={addingStudent}
+        onOk={closeAddStudentModal}
+        onCancel={closeAddStudentModal}
+        width={1000}
+      >
+        <AddStudentForm
+          onSuccess={() => {
+            closeAddStudentModal();
+            fetchStudents();
+          }}
+          onFailure={(error) => {
+            console.log(error);
+          }}
+        />
+      </Modal>
+      <Footer
+        numberOfStudents={students.length}
+        onAddStudentClick={openAddStudentModal}
+      ></Footer>
+    </div>
+  );
 
   if (fetching) {
     return (
@@ -82,34 +112,23 @@ const App = () => {
     return (
       <Container>
         <Table
+          style={{ marginBottom: "100px" }}
           columns={studentCols}
           dataSource={students}
           rowKey={"studentId"}
           pagination={false}
         />
-        <Modal
-          title="Add new student"
-          open={addingStudent}
-          onOk={closeAddStudentModal}
-          onCancel={closeAddStudentModal}
-          width={1000}>
-          <AddStudentForm
-            onSuccess={() => {
-              this.closeAddStudentModal();
-              this.fetchStudents();
-            }}
-            onFailure={(error) => {
-              const message = error.error.message;
-              const description = error.error.httpStatus;
-              // errorNotification(message, description);
-            }}
-          />
-        </Modal>
-        <Footer onAddStudentClick={openAddStudentModal}></Footer>
+
+        {commonElements()}
       </Container>
     );
   }
-  return <h1>No Student found</h1>;
+  return (
+    <Container>
+      <Empty description={<h1>No Student found</h1>} />
+      {commonElements()}
+    </Container>
+  );
 };
 
 export default App;
